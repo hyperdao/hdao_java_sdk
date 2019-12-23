@@ -1,6 +1,7 @@
 hdao java sdk
 ==================
 
+this is hdao project's java sdk. You can use this sdk to integrated with hdao contracts.
 
 # Usage
 
@@ -10,12 +11,58 @@ hdao java sdk
 * ``mvn package install -Dmaven.test.skip=true` to install hdaojava sdk lib locally`
 * add hdao:hdaojava:${version} dependency to pom.xml or build.gradle
 
+# Apis
+
+* sign transaction
+
+```
+HdaoTransactionBuilder.signTransaction(Transaction tx, String wif, String chainId, String addressPrefix)
+```
+
+* open cdc
+```
+HdaoTransactionBuilder.openCdc(NodeClient nodeClient, String callerAddr, String callerPubKey, String cdcContractAddress,
+                                                                BigDecimal collateralAmount, String collateralAssetId,
+                                                            int collateralAssetPrecision, BigDecimal stableCoinAmount, int stableCoinPrecision)
+```
+
+* add collateral asset to cdc
+
+```
+HdaoTransactionBuilder.addCollateral(NodeClient nodeClient, String callerAddr, String callerPubKey, String cdcContractAddress,
+                                       String cdcId, BigDecimal collateralAmount, String collateralAssetId,
+                                       int collateralAssetPrecision)
+```
+
+* generate stable coin
+```
+HdaoTransactionBuilder.generateStableCoin(NodeClient nodeClient, String callerAddr, String callerPubKey, String cdcContractAddress,
+                                                                   String cdcId, BigDecimal stableCoinAmount, int stableCoinPrecision)
+```
+
+* transfer cdc token
+```
+HdaoTransactionBuilder.transferCdc(NodeClient nodeClient, String callerAddr, String callerPubKey, String cdcContractAddress,
+                                           String cdcId, String toAddr)
+```
+
 # Demo
+
+* get transaction ref info
+```
+private String getRefInfo() throws NodeException {
+    String nodeRpcEndpoint = "ws://nodeapi2.hxlab.org:6090";
+    NodeClient nodeClient = new NodeClient(nodeRpcEndpoint);
+    nodeClient.open();
+    nodeClient.sendLogin();
+    return nodeClient.getRefInfo();
+}
+```
 
 * create and sign transfer transaction
 
 ```
-String refInfo = "30375,575365464";
+String refInfo = getRefInfo();
 String chainId = Constants.mainnetChainId;
 String wifStr = "";
 String fromAddr = "";
@@ -32,7 +79,7 @@ log.info("signed tx: {}", txJson);
 * invoke contract transaction
 
 ```
-String refInfo = "16573,2299525098";
+String refInfo = getRefInfo();
 String chainId = Constants.mainnetChainId;
 String wifStr = "";
 String callerAddr = "";
@@ -48,6 +95,28 @@ BigDecimal fee = new BigDecimal("0.003");
 
 Transaction tx = TransactionBuilder.createContractInvokeTransaction(refInfo, callerAddr, callerPubKey,
         contractId, contractApi, contractArg, fee, gasLimit, gasPrice, null);
+String txJson = TransactionBuilder.signTransaction(tx, wifStr, chainId, Address.ADDRESS_PREFIX);
+log.info("signed tx: {}", txJson);
+```
+
+* transfer asset to contract transaction
+```
+String refInfo = getRefInfo();
+String chainId = Constants.mainnetChainId;
+String wifStr = "";
+String callerAddr = "";
+String callerPubKey = "";
+String contractId = "HXCHcRE3jsyHGrtoE2ZJZtpHsEiYTQ7VrHkb";
+BigDecimal transferAmount = new BigDecimal("0.001");
+String transferMemo = "hi";
+
+long gasLimit = 10000;
+long gasPrice = 1;
+
+BigDecimal fee = new BigDecimal("0.003");
+
+Transaction tx = TransactionBuilder.createContractTransferTransaction(refInfo, callerAddr, callerPubKey,
+        contractId, transferAmount, "1.3.0", Constants.hxPrecision, transferMemo, fee, gasLimit, gasPrice, null);
 String txJson = TransactionBuilder.signTransaction(tx, wifStr, chainId, Address.ADDRESS_PREFIX);
 log.info("signed tx: {}", txJson);
 ```
