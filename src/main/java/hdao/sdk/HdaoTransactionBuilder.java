@@ -8,7 +8,9 @@ import cash.hx.hxjava.transaction.Transaction;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
+/**
+* building HDao transactions
+*/
 public class HdaoTransactionBuilder {
 
     private static String getRefInfo(NodeClient nodeClient) throws NodeException {
